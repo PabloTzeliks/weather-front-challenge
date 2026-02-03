@@ -1,59 +1,135 @@
 const inputCidade = document.getElementById('inputCidade');
 const btnBuscar = document.getElementById('btnBuscar');
-const areaResultado = document.getElementById('areaResultado');
+const labelLocalizacao = document.getElementById('localizacaoTexto');
+const sectionDestaque = document.getElementById('destaqueHoje');
+const sectionSemanal = document.getElementById('previsaoSemanal');
 
-async function buscarDadosClima(cidade) {
+// Funções Auxiliáres
 
-    const urlGeocoding = `https://geocoding-api.open-meteo.com/v1/search?name=${cidade}&count=1&language=pt&format=json`;
+function getIconeClima(code) {
+    if (code === 0) return '☀️'; // Céu limpo
+    if (code >= 1 && code <= 3) return '⛅'; // Parcialmente nublado
+    if (code >= 45 && code <= 48) return '🌫️'; // Nevoeiro
+    if (code >= 51 && code <= 67) return '🌧️'; // Chuva
+    if (code >= 71 && code <= 77) return '❄️'; // Neve
+    if (code >= 80 && code <= 82) return '🌦️'; // Chuva forte
+    if (code >= 95) return '⛈️'; // Tempestade
+    return '❓';
+}
 
-    const respostaGeo = await fetch(urlGeocoding);
-    const dadosGeo = await respostaGeo.json();
+function formatarData(dataString) {
+    const data = new Date(dataString);
+    return data.toLocaleDateString('pt-BR', { weekday: 'long' });
+}
 
-    if (!dadosGeo.results || dadosGeo.results.length === 0) {
+// Busca de Dados
 
-        throw new Error("Cidade não Encontrada!");
+async function buscarDadosPorCoordenadas(lat, lon, nomeCidade = "Sua Localização") {
+    try {
+        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min&timezone=auto`;
+
+        const resposta = await fetch(url);
+        const dados = await resposta.json();
+
+        atualizarInterface(dados, nomeCidade);
+
+    } catch (erro) {
+        console.error("Erro ao buscar clima:", erro);
+        alert("Erro ao obter dados meteorológicos.");
+    }
+}
+
+async function buscarCoordenadasCidade(cidade) {
+    const url = `https://geocoding-api.open-meteo.com/v1/search?name=${cidade}&count=1&language=pt&format=json`;
+    
+    const resposta = await fetch(url);
+    const dados = await resposta.json();
+
+    if (!dados.results || dados.results.length === 0) {
+        throw new Error("Cidade não encontrada");
     }
 
-    const latitude = dadosGeo.results[0].latitude;
-    const longitude = dadosGeo.results[0].longitude;
-    const nome = dadosGeo.results[0].name;
-    
-    const urlClima = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`;
-
-    const respostaClima = await fetch(urlClima);
-    const dadosClima = await respostaClima.json();
-
     return {
-        cidade: nome,
-        temperatura: dadosClima.current_weather.temperature,
-        velocidadeVento: dadosClima.current_weather.windspeed
+        lat: dados.results[0].latitude,
+        lon: dados.results[0].longitude,
+        nome: dados.results[0].name,
+        pais: dados.results[0].country
     };
 }
 
-btnBuscar.addEventListener('click', async () => {
+// Visual
 
-    const cidadeDigitada = inputCidade.value;
+function atualizarInterface(dados, nomeCidade) {
+    labelLocalizacao.textContent = `Localização: ${nomeCidade}`;
 
-    if (cidadeDigitada === "") {
-        alert('Por favor digite uma Cidade!');
-        return;
-    }
+    // Diária
+    const atual = dados.current;
+    const iconeHoje = getIconeClima(atual.weather_code);
+    
+    sectionDestaque.innerHTML = `
+        <h2>${nomeCidade} ${iconeHoje}</h2>
+        <div class="temp-grande">${Math.round(atual.temperature_2m)}°C</div>
+        <div class="info-extra">
+            <span>💧 ${atual.relative_humidity_2m}% Umidade</span>
+            <span>💨 ${atual.wind_speed_10m} km/h Vento</span>
+        </div>
+        <p style="margin-top: 10px; font-size: 1.2rem;">Hoje</p>
+    `;
 
-    areaResultado.innerHTML = "<strong>Buscando informações climáticas<strong>";
+    // Semanal
+    sectionSemanal.innerHTML = '';
 
-    try {
-        
-        const dados = await buscarDadosClima(cidadeDigitada);
+    const dias = dados.daily.time;
+    const codigos = dados.daily.weather_code;
+    const max = dados.daily.temperature_2m_max;
+    const min = dados.daily.temperature_2m_min;
 
-        areaResultado.innerHTML = `
-            <h3>Tempo em ${dados.cidade}</h3>
-            <p class="dadosTemp">${dados.temperatura}°C</p>
-            <p class="dadosTemp">Vento: ${dados.velocidadeVento} km/h</p>
+    for (let i = 1; i < dias.length; i++) {
+        const diaSemana = formatarData(dias[i]);
+        const icone = getIconeClima(codigos[i]);
+
+        const card = document.createElement('div');
+        card.className = 'card-dia';
+        card.innerHTML = `
+            <h4>${diaSemana}</h4>
+            <div class="icone-clima">${icone}</div>
+            <p>Max: <strong>${Math.round(max[i])}°C</strong></p>
+            <p>Min: <span style="color: #666">${Math.round(min[i])}°C</span></p>
         `;
 
-    } catch (erro) {
-        
-        console.error(erro);
-        areaResultado.innerHTML = `<p class="erroTemp">Erro: ${erro.message}</p>`;
+        sectionSemanal.appendChild(card);
     }
-})
+}
+
+// Iniciailização
+
+function carregarLocalizacaoInicial() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (posicao) => {
+                buscarDadosPorCoordenadas(posicao.coords.latitude, posicao.coords.longitude, "Localização Atual");
+            },
+            (erro) => {
+                console.warn("Geolocalização negada ou erro:", erro);
+                buscarDadosPorCoordenadas(-23.55, -46.63, "São Paulo (Padrão)"); 
+            }
+        );
+    } else {
+        alert("Seu navegador não suporta geolocalização.");
+    }
+}
+
+btnBuscar.addEventListener('click', async () => {
+    const cidade = inputCidade.value;
+    if (!cidade) return;
+
+    try {
+        const dadosGeo = await buscarCoordenadasCidade(cidade);
+        await buscarDadosPorCoordenadas(dadosGeo.lat, dadosGeo.lon, `${dadosGeo.nome}, ${dadosGeo.pais}`);
+    } catch (erro) {
+        alert(erro.message);
+    }
+});
+
+// Inicia o app
+carregarLocalizacaoInicial();
