@@ -64,6 +64,7 @@ function atualizarInterface(dados, nomeCidade) {
 
     // Diária
     const atual = dados.current;
+    const dias = dados.daily.time;
     const iconeHoje = getIconeClima(atual.weather_code);
     
     sectionDestaque.innerHTML = `
@@ -73,13 +74,12 @@ function atualizarInterface(dados, nomeCidade) {
             <span>💧 ${atual.relative_humidity_2m}% Umidade</span>
             <span>💨 ${atual.wind_speed_10m} km/h Vento</span>
         </div>
-        <p style="margin-top: 10px; font-size: 1.2rem;">Hoje</p>
+        <p style="margin-top: 10px; font-size: 1.2rem;">${formatarData(dias[0])}</p>
     `;
 
     // Semanal
     sectionSemanal.innerHTML = '';
 
-    const dias = dados.daily.time;
     const codigos = dados.daily.weather_code;
     const max = dados.daily.temperature_2m_max;
     const min = dados.daily.temperature_2m_min;

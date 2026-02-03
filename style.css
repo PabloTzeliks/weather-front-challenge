@@ -89,17 +89,15 @@ button:hover { background-color: #003366; }
     border-radius: 10px;
     text-align: center;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: default;
+}
+
+.card-dia:hover {
+    transform: scale(1.05);
+    box-shadow: 0 8px 15px rgba(0,0,0,0.1);
 }
 
 .card-dia h4 { margin-bottom: 0.5rem; color: var(--dark-blue); }
 .icone-clima { font-size: 2rem; margin: 0.5rem 0; }
-
-.dadosTemp {
-    font-size: 24px; 
-    font-weight: bold;
-}
-
-.erroTemp {
-    color: red;
-    font-weight: bold;
-}
