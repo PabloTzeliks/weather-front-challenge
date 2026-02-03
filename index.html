@@ -8,21 +8,26 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header class="container">
-        <h1>Previsão do Tempo</h1>
-    </header>
-
-    <main>
-        <h2>Consultar Tempo</h2>
-    
-        <input type="text" id="inputCidade" placeholder="Digite a cidade...">
-    
-        <button id="btnBuscar">Ver Temperatura</button>
-
-        <div id="areaResultado" class="resultado">
-
-            <p>Aguardando pesquisa...</p>
+    <header>
+        <div class="logo">Previsão do Tempo</div>
+        <div class="search-bar">
+            <input type="text" id="inputCidade" placeholder="Buscar cidade...">
+            <button id="btnBuscar">🔍</button>
         </div>
+    </header>
+    
+    <div class="sub-header">
+        <span id="localizacaoTexto">Localização: Detectando...</span>
+    </div>
+
+    <main class="container">
+        <section id="destaqueHoje" class="destaque">
+            <p>Carregando dados locais...</p>
+        </section>
+
+        <h3>Próximos Dias</h3>
+        <section id="previsaoSemanal" class="grid-semanal">
+            </section>
     </main>
 
     <script src="script.js"></script>
