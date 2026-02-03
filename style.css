@@ -7,6 +7,38 @@
     --text-color: #333;
 }
 
+/*  Gradientes Dinâmicos */
+
+.destaque.fundo-sol {
+    background: linear-gradient(135deg, #f2994a, #4a90e2);
+}
+
+/* Nublado */
+.destaque.fundo-nublado {
+    background: linear-gradient(135deg, #757f9a, #d7dde8);
+    color: #333;
+}
+.destaque.fundo-nublado h2, 
+.destaque.fundo-nublado .temp-grande, 
+.destaque.fundo-nublado .info-extra {
+    color: #2c3e50; 
+}
+
+/* Chuva */
+.destaque.fundo-chuva {
+    background: linear-gradient(135deg, #005c97, #363795);
+}
+
+/* Neve */
+.destaque.fundo-neve {
+    background: linear-gradient(135deg, #83a4d4, #b6fbff);
+    color: #2c3e50;
+}
+.destaque.fundo-neve h2, 
+.destaque.fundo-neve .temp-grande {
+    color: #1e3c72;
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
 
 body { background-color: var(--bg-color); color: var(--text-color); }

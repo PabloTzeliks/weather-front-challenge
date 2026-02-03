@@ -17,6 +17,22 @@ function getIconeClima(code) {
     return '❓';
 }
 
+function getClasseClima(code) {
+    // Sol / Limpo
+    if (code === 0) return 'fundo-sol';
+    
+    // Nublado / Nevoeiro
+    if (code >= 1 && code <= 48) return 'fundo-nublado';
+    
+    // Chuva / Chuvisco / Tempestade
+    if ((code >= 51 && code <= 67) || (code >= 80 && code <= 99)) return 'fundo-chuva';
+    
+    // Neve
+    if (code >= 71 && code <= 77) return 'fundo-neve';
+
+    return 'fundo-sol'; // Padrão
+}
+
 function formatarData(dataString) {
     const data = new Date(dataString);
     return data.toLocaleDateString('pt-BR', { weekday: 'long' });
@@ -64,8 +80,12 @@ function atualizarInterface(dados, nomeCidade) {
 
     // Diária
     const atual = dados.current;
-    const dias = dados.daily.time;
     const iconeHoje = getIconeClima(atual.weather_code);
+    const classeFundo = getClasseClima(atual.weather_code);
+
+    const dias = dados.daily.time;
+    
+    sectionDestaque.className = `destaque ${classeFundo}`; 
     
     sectionDestaque.innerHTML = `
         <h2>${nomeCidade} ${iconeHoje}</h2>
